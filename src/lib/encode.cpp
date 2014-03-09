@@ -24,50 +24,9 @@
 
 #include "../include/libsac.h"
 
-#include "decode_dd8a.h"
 #include "packed_data.h"
 
 namespace libsac {
-
-void free_data(packed_data_t *data) {
-  delete data;
-}
-
-void decode_channel(int16_t *out, const packed_data_t *in, int start, int count, int channel) {
-  if (!in || !out) {
-    return;
-  }
-
-  switch (in->data_encoding()) {
-    case FORMAT_DD8A:
-      dd8a::decode_channel(out, in, start, count, channel);
-      break;
-    case FORMAT_DD4A:
-      /* NOT YET IMPLEMENTED */;
-      break;
-    case FORMAT_UNDEFINED:
-    default:
-      break;
-  }
-}
-
-void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int count) {
-  if (!in || !out) {
-    return;
-  }
-
-  switch (in->data_encoding()) {
-    case FORMAT_DD8A:
-      dd8a::decode_interleaved(out, in, start, count);
-      break;
-    case FORMAT_DD4A:
-      /* NOT YET IMPLEMENTED */;
-      break;
-    case FORMAT_UNDEFINED:
-    default:
-      break;
-  }
-}
 
 packed_data_t *encode(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t **channels) {
   /* NOT YET IMPLEMENTED */;
@@ -80,3 +39,4 @@ packed_data_t *encode_interleaved(int num_samples, int num_channels, int sample_
 }
 
 } // namespace libsac
+

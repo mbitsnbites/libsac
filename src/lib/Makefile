@@ -32,10 +32,12 @@ CPPFLAGS += -MMD -MP
 
 OUTDIR ?= out
 
-OBJS = $(OUTDIR)/libsac.o \
+OBJS = $(OUTDIR)/packed_data.o \
        $(OUTDIR)/loader.o \
        $(OUTDIR)/saver.o \
+       $(OUTDIR)/decode.o \
        $(OUTDIR)/decode_dd8a.o \
+       $(OUTDIR)/encode.o \
        $(OUTDIR)/quant_lut_dd4a.o \
        $(OUTDIR)/quant_lut_dd8a.o
 
