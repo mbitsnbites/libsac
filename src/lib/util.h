@@ -56,7 +56,8 @@ class scoped_ptr {
 
     scoped_ptr<T> &operator=(scoped_ptr<T> &other) {
       reset(other.m_ptr);
-      other.reset(0);
+      other.m_ptr = 0;
+      return *this;
     }
 
     T *operator->() const {
