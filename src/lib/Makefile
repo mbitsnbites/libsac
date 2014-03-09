@@ -30,12 +30,16 @@ ARFLAGS  = -rsc
 # Automatically generate dependency files
 CPPFLAGS += -MMD -MP
 
-OBJS = libsac.o \
-       decode_dd8a.o \
-       quant_lut_dd4a.o \
-       quant_lut_dd8a.o
+OUTDIR ?= out
 
-LIB = libsac.a
+OBJS = $(OUTDIR)/libsac.o \
+       $(OUTDIR)/loader.o \
+       $(OUTDIR)/saver.o \
+       $(OUTDIR)/decode_dd8a.o \
+       $(OUTDIR)/quant_lut_dd4a.o \
+       $(OUTDIR)/quant_lut_dd8a.o
+
+LIB = $(OUTDIR)/libsac.a
 
 .PHONY: all clean
 
@@ -47,7 +51,7 @@ clean:
 $(LIB): $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
-%.o: %.cpp
+$(OUTDIR)/%.o: %.cpp
 	$(CPP) $(CPPFLAGS) -o $@ $<
 
 # These dependency files are generated automatically when building the object

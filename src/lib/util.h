@@ -27,6 +27,7 @@
 
 namespace libsac {
 
+/// Clamp the input to the range [-32768, 32767].
 int inline clamp(const int x) {
   if (x < -32768)
     return -32768;
@@ -34,6 +35,52 @@ int inline clamp(const int x) {
     return 32767;
   return x;
 }
+
+/// Scoped pointer class.
+/// This is a simple scoped pointer class, similar to C++11 unique_ptr.
+template <class T>
+class scoped_ptr {
+  public:
+    scoped_ptr() : m_ptr(0) {}
+
+    scoped_ptr(T *ptr) : m_ptr(ptr) {}
+
+    scoped_ptr(scoped_ptr<T> &other) {
+      reset(other.m_ptr);
+      other.reset(0);
+    }
+
+    ~scoped_ptr() {
+      delete m_ptr;
+    }
+
+    scoped_ptr<T> &operator=(scoped_ptr<T> &other) {
+      reset(other.m_ptr);
+      other.reset(0);
+    }
+
+    T *operator->() const {
+      return m_ptr;
+    }
+
+    void reset(T *ptr) {
+      delete m_ptr;
+      m_ptr = ptr;
+    }
+
+    T *get() const {
+      return m_ptr;
+    }
+
+    T *release() {
+      T *ptr = m_ptr;
+      m_ptr = 0;
+      return ptr;
+    }
+
+  private:
+    T *m_ptr;
+};
 
 } // namespace libsac
 

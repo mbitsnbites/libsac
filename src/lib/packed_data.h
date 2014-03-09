@@ -25,15 +25,12 @@
 #ifndef LIBSAC_PACKED_DATA_H_
 #define LIBSAC_PACKED_DATA_H_
 
+#include "../include/libsac.h"
+
 namespace libsac {
 
 class packed_data_t {
   public:
-    enum encoding {
-      DD4A = 1,
-      DD8A = 2
-    };
-
     packed_data_t(
         uint8_t *data,
         int size,

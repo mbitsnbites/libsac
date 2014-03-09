@@ -21,22 +21,6 @@
 //     3. This notice may not be removed or altered from any source
 //     distribution.
 //-----------------------------------------------------------------------------
-// 8-bit DDPCM:
-// - 16 samples per block
-// - 17 bytes / block (53.1% of original size)
-// - 8 different maps (4 KB using 16-bit deltas)
-// - Block format:
-//   [ssss|ssss][ssss|mmmp][D1][D2] ... [D15]
-//    s: Starting point (12-bit precision)
-//    m: Map-selection (3 bits)
-//    p: Predictor-selection (1 bit)
-//   Dx: Delta samples (8 bits / delta)
-//-----------------------------------------------------------------------------
-// This decoder is fairly generic, and not very optimized. When performance is
-// critical, and the configuraiton is known, it is recommended that a
-// specialized decoder is written (e.g. if all decoding operations will be
-// block aligned, and only interleaved / non-interleaved is to be used).
-//-----------------------------------------------------------------------------
 
 #include "../include/libsac.h"
 
@@ -45,32 +29,54 @@
 
 namespace libsac {
 
+void free_data(packed_data_t *data) {
+  delete data;
+}
+
 void decode_channel(int16_t *out, const packed_data_t *in, int start, int count, int channel) {
-  if (!in || !out)
+  if (!in || !out) {
     return;
+  }
 
   switch (in->data_encoding()) {
-  case packed_data_t::DD8A:
-    dd8a::decode_channel(out, in, start, count, channel);
-    break;
-  case packed_data_t::DD4A:
-    /* NOT YET IMPLEMENTED */;
-    break;
+    case FORMAT_DD8A:
+      dd8a::decode_channel(out, in, start, count, channel);
+      break;
+    case FORMAT_DD4A:
+      /* NOT YET IMPLEMENTED */;
+      break;
+    case FORMAT_UNDEFINED:
+    default:
+      break;
   }
 }
 
 void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int count) {
-  if (!in || !out)
+  if (!in || !out) {
     return;
+  }
 
   switch (in->data_encoding()) {
-  case packed_data_t::DD8A:
-    dd8a::decode_interleaved(out, in, start, count);
-    break;
-  case packed_data_t::DD4A:
-    /* NOT YET IMPLEMENTED */;
-    break;
+    case FORMAT_DD8A:
+      dd8a::decode_interleaved(out, in, start, count);
+      break;
+    case FORMAT_DD4A:
+      /* NOT YET IMPLEMENTED */;
+      break;
+    case FORMAT_UNDEFINED:
+    default:
+      break;
   }
+}
+
+packed_data_t *encode(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t **channels) {
+  /* NOT YET IMPLEMENTED */;
+  return 0;
+}
+
+packed_data_t *encode_interleaved(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t *data) {
+  /* NOT YET IMPLEMENTED */;
+  return 0;
 }
 
 } // namespace libsac

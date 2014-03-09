@@ -38,13 +38,27 @@ typedef unsigned int uint32_t;
 
 namespace libsac {
 
-// Forward declarations (defined internally).
+//-----------------------------------------------------------------------------
+// Packed data definitions.
+//-----------------------------------------------------------------------------
+
+enum encoding {
+  FORMAT_UNDEFINED = 0,
+  FORMAT_DD4A = 1,
+  FORMAT_DD8A = 2
+};
+
 class packed_data_t;
+
+void free_data(packed_data_t *data);
 
 
 //-----------------------------------------------------------------------------
 // File and stream I/O.
 //-----------------------------------------------------------------------------
+
+packed_data_t *load_file(const char *file_name);
+void save_file(const char *file_name, packed_data_t *data);
 
 
 //-----------------------------------------------------------------------------
@@ -58,6 +72,9 @@ void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int co
 //-----------------------------------------------------------------------------
 // Encoding.
 //-----------------------------------------------------------------------------
+
+packed_data_t *encode(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t **channels);
+packed_data_t *encode_interleaved(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t *data);
 
 
 } // namespace libsac
