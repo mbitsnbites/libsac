@@ -27,7 +27,7 @@
 
 #include "../include/libsac.h"
 
-namespace libsac {
+namespace sac {
 
 class packed_data_t {
   public:
@@ -89,6 +89,6 @@ class packed_data_t {
     encoding m_data_encoding;
 };
 
-} // namespace libsac
+} // namespace sac
 
 #endif // LIBSAC_PACKED_DATA_H_

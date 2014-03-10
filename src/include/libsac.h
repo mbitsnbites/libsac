@@ -36,7 +36,7 @@ typedef unsigned int uint32_t;
 # include <stdint.h>
 #endif
 
-namespace libsac {
+namespace sac {
 
 //-----------------------------------------------------------------------------
 // Packed data definitions.
@@ -77,6 +77,6 @@ packed_data_t *encode(int num_samples, int num_channels, int sample_rate, encodi
 packed_data_t *encode_interleaved(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t *data);
 
 
-} // namespace libsac
+} // namespace sac
 
 #endif // _LIBSAC_H_

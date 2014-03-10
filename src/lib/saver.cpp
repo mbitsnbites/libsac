@@ -29,7 +29,7 @@
 #include "packed_data.h"
 #include "util.h"
 
-namespace libsac {
+namespace sac {
 
 namespace {
 
@@ -95,4 +95,4 @@ void save_file(const char *file_name, const packed_data_t *data) {
   f.write(reinterpret_cast<char*>(data->data()), data->size());
 }
 
-} // namespace libsac
+} // namespace sac

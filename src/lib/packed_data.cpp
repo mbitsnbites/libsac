@@ -26,10 +26,10 @@
 
 #include "packed_data.h"
 
-namespace libsac {
+namespace sac {
 
 void free_data(packed_data_t *data) {
   delete data;
 }
 
-} // namespace libsac
+} // namespace sac

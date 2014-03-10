@@ -26,7 +26,7 @@
 
 #include "packed_data.h"
 
-namespace libsac {
+namespace sac {
 
 packed_data_t *encode(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t **channels) {
   /* NOT YET IMPLEMENTED */;
@@ -38,5 +38,5 @@ packed_data_t *encode_interleaved(int num_samples, int num_channels, int sample_
   return 0;
 }
 
-} // namespace libsac
+} // namespace sac
 

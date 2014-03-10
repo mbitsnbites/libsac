@@ -29,7 +29,7 @@
 #include "packed_data.h"
 #include "util.h"
 
-namespace libsac {
+namespace sac {
 
 namespace {
 
@@ -133,4 +133,4 @@ packed_data_t *load_file(const char *file_name) {
   return data.release();
 }
 
-} // namespace libsac
+} // namespace sac

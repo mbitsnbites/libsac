@@ -27,7 +27,7 @@
 
 #include "../include/libsac.h"
 
-namespace libsac {
+namespace sac {
 
 namespace dd4a {
 
@@ -37,6 +37,6 @@ void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int co
 
 } // namespace dd4a
 
-} // namespace libsac
+} // namespace sac
 
 #endif // LIBSAC_DECODE_DD4A_H_

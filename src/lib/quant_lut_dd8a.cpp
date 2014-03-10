@@ -22,7 +22,7 @@
 //     distribution.
 //-----------------------------------------------------------------------------
 
-namespace libsac {
+namespace sac {
 
 namespace dd8a {
 
@@ -311,4 +311,4 @@ const short kQuantLut[8][256] = {
 
 } // namespace dd8a
 
-} // namespace libsac
+} // namespace sac

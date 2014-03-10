@@ -25,7 +25,7 @@
 #ifndef LIBSAC_UTIL_H_
 #define LIBSAC_UTIL_H_
 
-namespace libsac {
+namespace sac {
 
 /// Clamp the input to the range [-32768, 32767].
 int inline clamp(const int x) {
@@ -87,6 +87,6 @@ class scoped_ptr {
     T *m_ptr;
 };
 
-} // namespace libsac
+} // namespace sac
 
 #endif // LIBSAC_UTIL_H_

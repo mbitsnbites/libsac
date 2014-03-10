@@ -30,7 +30,7 @@
 #include "decode_dd8a.h"
 #include "packed_data.h"
 
-namespace libsac {
+namespace sac {
 
 void decode_channel(int16_t *out, const packed_data_t *in, int start, int count, int channel) {
   // Missing input/output buffers?
@@ -101,4 +101,4 @@ void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int co
   }
 }
 
-} // namespace libsac
+} // namespace sac
