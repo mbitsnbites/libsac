@@ -45,13 +45,17 @@ class scoped_ptr {
 
     scoped_ptr(T *ptr) : m_ptr(ptr) {}
 
-    scoped_ptr(scoped_ptr<T> &other) {
-      reset(other.m_ptr);
-      other.reset(0);
+    scoped_ptr(scoped_ptr<T> &other) : m_ptr(other.m_ptr) {
+      other.m_ptr = 0;
     }
 
     ~scoped_ptr() {
       delete m_ptr;
+    }
+
+    scoped_ptr<T> &operator=(T *ptr) {
+      reset(ptr);
+      return *this;
     }
 
     scoped_ptr<T> &operator=(scoped_ptr<T> &other) {
