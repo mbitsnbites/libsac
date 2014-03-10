@@ -24,22 +24,44 @@
 
 #include "../include/libsac.h"
 
+#include <algorithm>
+
+#include "decode_dd4a.h"
 #include "decode_dd8a.h"
 #include "packed_data.h"
 
 namespace libsac {
 
 void decode_channel(int16_t *out, const packed_data_t *in, int start, int count, int channel) {
+  // Missing input/output buffers?
   if (!in || !out) {
     return;
   }
 
+  // Invalid channel?
+  if (channel < 0 || channel >= in->num_channels()) {
+    return;
+  }
+
+  // Clamp arguments to the range of the input data.
+  if (start < 0) {
+    count += start;
+    start = 0;
+  }
+  count = std::min(start + count, in->num_samples()) - start;
+
+  // Nothing to do?
+  if (count < 1) {
+    return;
+  }
+
+  // Perform format dependent decoding.
   switch (in->data_encoding()) {
+    case FORMAT_DD4A:
+      dd4a::decode_channel(out, in, start, count, channel);
+      break;
     case FORMAT_DD8A:
       dd8a::decode_channel(out, in, start, count, channel);
-      break;
-    case FORMAT_DD4A:
-      /* NOT YET IMPLEMENTED */;
       break;
     case FORMAT_UNDEFINED:
     default:
@@ -48,16 +70,30 @@ void decode_channel(int16_t *out, const packed_data_t *in, int start, int count,
 }
 
 void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int count) {
+  // Missing input/output buffers?
   if (!in || !out) {
     return;
   }
 
+  // Clamp arguments to the range of the input data.
+  if (start < 0) {
+    count += start;
+    start = 0;
+  }
+  count = std::min(start + count, in->num_samples()) - start;
+
+  // Nothing to do?
+  if (count < 1) {
+    return;
+  }
+
+  // Perform format dependent decoding.
   switch (in->data_encoding()) {
+    case FORMAT_DD4A:
+      dd4a::decode_interleaved(out, in, start, count);
+      break;
     case FORMAT_DD8A:
       dd8a::decode_interleaved(out, in, start, count);
-      break;
-    case FORMAT_DD4A:
-      /* NOT YET IMPLEMENTED */;
       break;
     case FORMAT_UNDEFINED:
     default:
