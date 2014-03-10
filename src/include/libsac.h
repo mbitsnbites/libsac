@@ -58,7 +58,7 @@ void free_data(packed_data_t *data);
 //-----------------------------------------------------------------------------
 
 packed_data_t *load_file(const char *file_name);
-void save_file(const char *file_name, packed_data_t *data);
+void save_file(const char *file_name, const packed_data_t *data);
 
 
 //-----------------------------------------------------------------------------
