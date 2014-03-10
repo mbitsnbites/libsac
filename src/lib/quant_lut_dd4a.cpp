@@ -26,7 +26,7 @@ namespace sac {
 
 namespace dd4a {
 
-const short kQuantLut[64][16] = {
+extern const short kQuantLut[64][16] = {
   {
     1,2,4,6,9,13,17,24,
     -1,-2,-4,-6,-9,-13,-17,-24

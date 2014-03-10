@@ -26,7 +26,7 @@ namespace sac {
 
 namespace dd8a {
 
-const short kQuantLut[8][256] = {
+extern const short kQuantLut[8][256] = {
   // Linear part slope: 1
   {
     1,2,3,4,5,6,7,8,
