@@ -36,9 +36,11 @@ OBJS = $(OUTDIR)/decode.o \
        $(OUTDIR)/decode_dd4a.o \
        $(OUTDIR)/decode_dd8a.o \
        $(OUTDIR)/encode.o \
+       $(OUTDIR)/encode_dd8a.o \
        $(OUTDIR)/loader.o \
        $(OUTDIR)/packed_data.o \
        $(OUTDIR)/saver.o \
+       $(OUTDIR)/util.o \
        $(OUTDIR)/quant_lut_dd4a.o \
        $(OUTDIR)/quant_lut_dd8a.o
 

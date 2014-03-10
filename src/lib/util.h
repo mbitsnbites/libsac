@@ -25,9 +25,13 @@
 #ifndef LIBSAC_UTIL_H_
 #define LIBSAC_UTIL_H_
 
+#include "../include/libsac.h"
+
 namespace sac {
 
-/// Clamp the input to the range [-32768, 32767].
+/// @brief Clamp the input to the range [-32768, 32767].
+/// @param x The value to clamp.
+/// @returns The input value clamped to the range [-32768, 32767].
 int inline clamp(const int x) {
   if (x < -32768)
     return -32768;
@@ -36,7 +40,13 @@ int inline clamp(const int x) {
   return x;
 }
 
-/// Scoped pointer class.
+/// @brief Select the best predictor for the given block.
+/// @param block Start of the block.
+/// @param count Number of samples in the block.
+/// @returns The predictor number (0 or 1).
+int select_predictor(const int16_t *block, const int count);
+
+/// @brief Scoped pointer class.
 /// This is a simple scoped pointer class, similar to C++11 unique_ptr.
 template <class T>
 class scoped_ptr {

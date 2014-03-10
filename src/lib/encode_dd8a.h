@@ -22,38 +22,19 @@
 //     distribution.
 //-----------------------------------------------------------------------------
 
-#include "../include/libsac.h"
+#ifndef LIBSAC_DECODE_DD8A_H_
+#define LIBSAC_DECODE_DD8A_H_
 
-#include "encode_dd8a.h"
-#include "packed_data.h"
-#include "util.h"
+#include "../include/libsac.h"
 
 namespace sac {
 
-packed_data_t *encode(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t **channels) {
-  // Check input arguments
-  if (!channels || num_channels < 1 || num_samples < 1 || sample_rate < 1 || (format != FORMAT_DD4A && format != FORMAT_DD8A)) {
-    return 0;
-  }
+namespace dd8a {
 
-  // Perform format dependent encoding.
-  switch (format) {
-    case FORMAT_DD4A:
-      // NOT YET IMPLEMENTED!
-      // return dd4a::encode(num_samples, num_channels, sample_rate, format, channels);
-      return 0;
-    case FORMAT_DD8A:
-      return dd8a::encode(num_samples, num_channels, sample_rate, channels);
-    case FORMAT_UNDEFINED:
-    default:
-      return 0;
-  }
-}
+packed_data_t *encode(int num_samples, int num_channels, int sample_rate, const int16_t **channels);
 
-packed_data_t *encode_interleaved(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t *data) {
-  /* NOT YET IMPLEMENTED */
-  return 0;
-}
+} // namespace dd8a
 
 } // namespace sac
 
+#endif // LIBSAC_DECODE_DD8A_H_

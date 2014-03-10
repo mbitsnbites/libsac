@@ -22,38 +22,30 @@
 //     distribution.
 //-----------------------------------------------------------------------------
 
-#include "../include/libsac.h"
-
-#include "encode_dd8a.h"
-#include "packed_data.h"
 #include "util.h"
+
+#include <algorithm>
 
 namespace sac {
 
-packed_data_t *encode(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t **channels) {
-  // Check input arguments
-  if (!channels || num_channels < 1 || num_samples < 1 || sample_rate < 1 || (format != FORMAT_DD4A && format != FORMAT_DD8A)) {
-    return 0;
+int select_predictor(const int16_t *block, const int count) {
+  int delta;
+
+  double err1 = 0.0;
+  for (int i = 1; i < count; ++i) {
+    delta = std::abs(static_cast<int>(block[i]) - static_cast<int>(block[i - 1]));
+    err1 += static_cast<double>(delta) * static_cast<double>(delta);
   }
 
-  // Perform format dependent encoding.
-  switch (format) {
-    case FORMAT_DD4A:
-      // NOT YET IMPLEMENTED!
-      // return dd4a::encode(num_samples, num_channels, sample_rate, format, channels);
-      return 0;
-    case FORMAT_DD8A:
-      return dd8a::encode(num_samples, num_channels, sample_rate, channels);
-    case FORMAT_UNDEFINED:
-    default:
-      return 0;
+  delta = std::abs(static_cast<int>(block[1]) - static_cast<int>(block[0]));
+  double err2 = static_cast<double>(delta) * static_cast<double>(delta);
+  for (int i = 2; i < count; ++i) {
+    int predicted = 2 * static_cast<int>(block[i - 1]) - static_cast<int>(block[i - 2]);
+    delta = std::abs(static_cast<int>(block[i]) - predicted);
+    err2 += static_cast<double>(delta) * static_cast<double>(delta);
   }
-}
 
-packed_data_t *encode_interleaved(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t *data) {
-  /* NOT YET IMPLEMENTED */
-  return 0;
+  return err2 <= err1 ? 1 : 0;
 }
 
 } // namespace sac
-
