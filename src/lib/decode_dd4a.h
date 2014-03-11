@@ -26,6 +26,7 @@
 #define LIBSAC_DECODE_DD4A_H_
 
 #include "../include/libsac.h"
+#include "packed_data.h"
 
 namespace sac {
 

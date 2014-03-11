@@ -29,7 +29,7 @@
 #include "packed_data.h"
 #include "util.h"
 
-namespace sac {
+using namespace sac;
 
 namespace {
 
@@ -51,7 +51,10 @@ void write_uint32(std::ostream &f, uint32_t x) {
 
 } // anonymous namespace
 
-void save_file(const char *file_name, const packed_data_t *data) {
+extern "C"
+void sac_save_file(const char *file_name, const sac_packed_data_t *data_) {
+  const packed_data_t *data = reinterpret_cast<const packed_data_t*>(data_);
+
   if (!file_name || !data) {
     return;
   }
@@ -61,12 +64,12 @@ void save_file(const char *file_name, const packed_data_t *data) {
 
   // Determine format fourcc code.
   uint32_t format_fourcc = 0;
-  switch (data->data_encoding()) {
-    case FORMAT_DD4A:
+  switch (data->encoding()) {
+    case SAC_FORMAT_DD4A:
       format_fourcc = 0x41344444;
       break;
 
-    case FORMAT_DD8A:
+    case SAC_FORMAT_DD8A:
       format_fourcc = 0x41384444;
       break;
 
@@ -94,5 +97,3 @@ void save_file(const char *file_name, const packed_data_t *data) {
   write_uint32(f, data->size());          // Chunk size.
   f.write(reinterpret_cast<char*>(data->data()), data->size());
 }
-
-} // namespace sac

@@ -22,20 +22,27 @@
 #     distribution.
 #-----------------------------------------------------------------------------
 
+OUTDIR     ?= out
+USE_OPENMP ?= YES
+
 CPP      = g++
 CPPFLAGS = -c -O3 -funroll-loops -W -Wall -Wextra
 AR       = ar
 ARFLAGS  = -rsc
 
+# Enable OpenMP?
+ifeq ($(USE_OPENMP), YES)
+CPPFLAGS += -fopenmp -DLIBSAC_USE_OPENMP
+endif
+
 # Automatically generate dependency files
 CPPFLAGS += -MMD -MP
-
-OUTDIR ?= out
 
 OBJS = $(OUTDIR)/decode.o \
        $(OUTDIR)/decode_dd4a.o \
        $(OUTDIR)/decode_dd8a.o \
        $(OUTDIR)/encode.o \
+       $(OUTDIR)/encode_dd4a.o \
        $(OUTDIR)/encode_dd8a.o \
        $(OUTDIR)/loader.o \
        $(OUTDIR)/packed_data.o \

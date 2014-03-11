@@ -98,7 +98,7 @@ void decode_block(const uint8_t *in, int16_t *out, const int offset, int count, 
     s1 = clamp(predicted + decode_map[*in++]);
 
     // Write sample to the output stream.
-    *out++ = s1;
+    *out = s1;
     out += stride;
   }
 }

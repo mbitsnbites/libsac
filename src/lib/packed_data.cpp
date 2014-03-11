@@ -26,10 +26,55 @@
 
 #include "packed_data.h"
 
-namespace sac {
+using namespace sac;
 
-void free_data(packed_data_t *data) {
+extern "C"
+void sac_free(sac_packed_data_t *data_) {
+  packed_data_t *data = reinterpret_cast<packed_data_t*>(data_);
   delete data;
 }
 
-} // namespace sac
+extern "C"
+int sac_get_size(const sac_packed_data_t *data_) {
+  const packed_data_t *data = reinterpret_cast<const packed_data_t*>(data_);
+  if (!data) {
+    return 0;
+  }
+  return data->size();
+}
+
+extern "C"
+int sac_get_num_samples(const sac_packed_data_t *data_) {
+  const packed_data_t *data = reinterpret_cast<const packed_data_t*>(data_);
+  if (!data) {
+    return 0;
+  }
+  return data->num_samples();
+}
+
+extern "C"
+int sac_get_num_channels(const sac_packed_data_t *data_) {
+  const packed_data_t *data = reinterpret_cast<const packed_data_t*>(data_);
+  if (!data) {
+    return 0;
+  }
+  return data->num_channels();
+}
+
+extern "C"
+int sac_get_sample_rate(const sac_packed_data_t *data_) {
+  const packed_data_t *data = reinterpret_cast<const packed_data_t*>(data_);
+  if (!data) {
+    return 0;
+  }
+  return data->sample_rate();
+}
+
+extern "C"
+sac_encoding_t sac_get_encoding(const sac_packed_data_t *data_) {
+  const packed_data_t *data = reinterpret_cast<const packed_data_t*>(data_);
+  if (!data) {
+    return SAC_FORMAT_UNDEFINED;
+  }
+  return data->encoding();
+}

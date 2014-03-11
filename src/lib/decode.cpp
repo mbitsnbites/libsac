@@ -30,9 +30,12 @@
 #include "decode_dd8a.h"
 #include "packed_data.h"
 
-namespace sac {
+using namespace sac;
 
-void decode_channel(int16_t *out, const packed_data_t *in, int start, int count, int channel) {
+extern "C"
+void sac_decode_channel(int16_t *out, const sac_packed_data_t *in_, int start, int count, int channel) {
+  const packed_data_t *in = reinterpret_cast<const packed_data_t*>(in_);
+
   // Missing input/output buffers?
   if (!in || !out) {
     return;
@@ -56,20 +59,23 @@ void decode_channel(int16_t *out, const packed_data_t *in, int start, int count,
   }
 
   // Perform format dependent decoding.
-  switch (in->data_encoding()) {
-    case FORMAT_DD4A:
+  switch (in->encoding()) {
+    case SAC_FORMAT_DD4A:
       dd4a::decode_channel(out, in, start, count, channel);
       break;
-    case FORMAT_DD8A:
+    case SAC_FORMAT_DD8A:
       dd8a::decode_channel(out, in, start, count, channel);
       break;
-    case FORMAT_UNDEFINED:
+    case SAC_FORMAT_UNDEFINED:
     default:
       break;
   }
 }
 
-void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int count) {
+extern "C"
+void sac_decode_interleaved(int16_t *out, const sac_packed_data_t *in_, int start, int count) {
+  const packed_data_t *in = reinterpret_cast<const packed_data_t*>(in_);
+
   // Missing input/output buffers?
   if (!in || !out) {
     return;
@@ -88,17 +94,15 @@ void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int co
   }
 
   // Perform format dependent decoding.
-  switch (in->data_encoding()) {
-    case FORMAT_DD4A:
+  switch (in->encoding()) {
+    case SAC_FORMAT_DD4A:
       dd4a::decode_interleaved(out, in, start, count);
       break;
-    case FORMAT_DD8A:
+    case SAC_FORMAT_DD8A:
       dd8a::decode_interleaved(out, in, start, count);
       break;
-    case FORMAT_UNDEFINED:
+    case SAC_FORMAT_UNDEFINED:
     default:
       break;
   }
 }
-
-} // namespace sac

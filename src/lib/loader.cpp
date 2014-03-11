@@ -29,7 +29,7 @@
 #include "packed_data.h"
 #include "util.h"
 
-namespace sac {
+using namespace sac;
 
 namespace {
 
@@ -51,7 +51,8 @@ uint32_t read_uint32(std::istream &f) {
 
 } // anonymous namespace
 
-packed_data_t *load_file(const char *file_name) {
+extern "C"
+sac_packed_data_t *sac_load_file(const char *file_name) {
   if (!file_name) {
     return 0;
   }
@@ -67,7 +68,7 @@ packed_data_t *load_file(const char *file_name) {
 
   scoped_ptr<packed_data_t> data;
   int num_samples = 0, sample_rate = 0, num_channels = 0;
-  encoding data_encoding = FORMAT_UNDEFINED;
+  sac_encoding_t encoding = SAC_FORMAT_UNDEFINED;
 
   // Read sub-chunks.
   while (bytes_left > 0) {
@@ -85,11 +86,11 @@ packed_data_t *load_file(const char *file_name) {
         uint32_t format_fourcc = read_uint32(f);
         switch (format_fourcc) {
           case 0x41344444:
-            data_encoding = FORMAT_DD4A;
+            encoding = SAC_FORMAT_DD4A;
             break;
 
           case 0x41384444:
-            data_encoding = FORMAT_DD8A;
+            encoding = SAC_FORMAT_DD8A;
             break;
 
           default:
@@ -106,18 +107,17 @@ packed_data_t *load_file(const char *file_name) {
 
       // DATA: Data chunk.
       case 0x41544144: {
-        if (data_encoding == FORMAT_UNDEFINED) {
+        if (encoding == SAC_FORMAT_UNDEFINED) {
           // We don't have the data definition yet.
           return 0;
         }
 
         if (chunk_size > 0) {
-          // Read the data...
-          uint8_t *buffer = new uint8_t[chunk_size];
-          f.read(reinterpret_cast<char*>(buffer), chunk_size);
+          // Create the packed data container.
+          data.reset(new packed_data_t(chunk_size, num_samples, num_channels, sample_rate, encoding));
 
-          // Create the packed data container (transfers ownership of the data buffer).
-          data.reset(new packed_data_t(buffer, chunk_size, num_samples, num_channels, sample_rate, data_encoding));
+          // Read the data...
+          f.read(reinterpret_cast<char*>(data->data()), chunk_size);
         }
         break;
       }
@@ -130,7 +130,5 @@ packed_data_t *load_file(const char *file_name) {
     }
   }
 
-  return data.release();
+  return reinterpret_cast<sac_packed_data_t*>(data.release());
 }
-
-} // namespace sac

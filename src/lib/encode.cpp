@@ -24,36 +24,31 @@
 
 #include "../include/libsac.h"
 
+#include "encode_dd4a.h"
 #include "encode_dd8a.h"
 #include "packed_data.h"
-#include "util.h"
 
-namespace sac {
+using namespace sac;
 
-packed_data_t *encode(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t **channels) {
+extern "C"
+sac_packed_data_t *sac_encode(int num_samples, int num_channels, int sample_rate, sac_encoding_t format, int16_t **channels) {
   // Check input arguments
-  if (!channels || num_channels < 1 || num_samples < 1 || sample_rate < 1 || (format != FORMAT_DD4A && format != FORMAT_DD8A)) {
+  if (!channels || num_channels < 1 || num_samples < 1 || sample_rate < 1 || (format != SAC_FORMAT_DD4A && format != SAC_FORMAT_DD8A)) {
     return 0;
   }
 
   // Perform format dependent encoding.
+  packed_data_t *out = 0;
   switch (format) {
-    case FORMAT_DD4A:
-      // NOT YET IMPLEMENTED!
-      // return dd4a::encode(num_samples, num_channels, sample_rate, format, channels);
-      return 0;
-    case FORMAT_DD8A:
-      return dd8a::encode(num_samples, num_channels, sample_rate, channels);
-    case FORMAT_UNDEFINED:
+    case SAC_FORMAT_DD4A:
+      out = dd4a::encode(num_samples, num_channels, sample_rate, channels);
+      break;
+    case SAC_FORMAT_DD8A:
+      out = dd8a::encode(num_samples, num_channels, sample_rate, channels);
+      break;
     default:
-      return 0;
+      break;
   }
+
+  return reinterpret_cast<sac_packed_data_t*>(out);
 }
-
-packed_data_t *encode_interleaved(int num_samples, int num_channels, int sample_rate, encoding format, const int16_t *data) {
-  /* NOT YET IMPLEMENTED */
-  return 0;
-}
-
-} // namespace sac
-

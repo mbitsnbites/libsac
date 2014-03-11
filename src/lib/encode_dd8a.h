@@ -26,12 +26,13 @@
 #define LIBSAC_DECODE_DD8A_H_
 
 #include "../include/libsac.h"
+#include "packed_data.h"
 
 namespace sac {
 
 namespace dd8a {
 
-packed_data_t *encode(int num_samples, int num_channels, int sample_rate, const int16_t **channels);
+packed_data_t *encode(int num_samples, int num_channels, int sample_rate, int16_t **channels);
 
 } // namespace dd8a
 

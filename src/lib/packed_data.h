@@ -32,22 +32,21 @@ namespace sac {
 class packed_data_t {
   public:
     packed_data_t(
-        uint8_t *data,
         int size,
         int num_samples,
         int num_channels,
         int sample_rate,
-        encoding data_encoding)
-        : m_data(data),
-          m_size(size),
+        sac_encoding_t encoding)
+        : m_size(size),
           m_num_samples(num_samples),
           m_num_channels(num_channels),
           m_sample_rate(sample_rate),
-          m_data_encoding(data_encoding) {}
+          m_encoding(encoding) {
+      m_data = new uint8_t[size];
+    }
 
     ~packed_data_t() {
-      if (m_data)
-        delete[] m_data;
+      delete[] m_data;
     }
 
     uint8_t *data() const {
@@ -70,8 +69,8 @@ class packed_data_t {
       return m_sample_rate;
     }
 
-    encoding data_encoding() const {
-      return m_data_encoding;
+    sac_encoding_t encoding() const {
+      return m_encoding;
     }
 
   private:
@@ -80,13 +79,11 @@ class packed_data_t {
     packed_data_t& operator=(const packed_data_t& other);
 
     uint8_t *m_data;
-    int m_size;
-
-    int m_num_samples;
-    int m_num_channels;
-    int m_sample_rate;
-
-    encoding m_data_encoding;
+    const int m_size;
+    const int m_num_samples;
+    const int m_num_channels;
+    const int m_sample_rate;
+    const sac_encoding_t m_encoding;
 };
 
 } // namespace sac

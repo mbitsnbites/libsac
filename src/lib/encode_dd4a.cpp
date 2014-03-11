@@ -21,23 +21,23 @@
 //     3. This notice may not be removed or altered from any source
 //     distribution.
 //-----------------------------------------------------------------------------
-// 8-bit DDPCM:
-// - 16 samples per block
-// - 17 bytes / block (53.1% of original size)
-// - 8 quantization maps (256 entires per map)
+// 4-bit DDPCM:
+// - 32 samples per block
+// - 18 bytes / block (28.1% of original size)
+// - 64 quantization maps (16 entries per map)
 // - Block format (bit layout):
-//   [ssss|ssss][ssss|mmmp][D1......][D2......][D3......] ... [D15......]
-//    s: Starting point (12 bits)
-//    m: Map-selection (3 bits)
+//   [ssss|ssss][ssss|smmm][mmmp|D1..][D2..|D3..][D4..|D5..] ... [D30.|D31.]
+//    s: Starting point (13 bits)
+//    m: Map-selection (6 bits)
 //    p: Predictor-selection (1 bit)
-//   Dx: Delta samples (8 bits / delta)
+//   Dx: Delta samples (4 bits / delta)
 //-----------------------------------------------------------------------------
 // This encoder is fairly generic, and not very optimized. There are several
 // possible optimizations, such as parallelization and pre-generating look up
 // tables (requires more memory).
 //-----------------------------------------------------------------------------
 
-#include "encode_dd8a.h"
+#include "encode_dd4a.h"
 
 #include <algorithm>
 
@@ -45,25 +45,25 @@
 #include "util.h"
 
 // If defined, use a slower but more accurate encoding algorithm.
-//#define LIBSAC_ACCURATE_DD8A_ENCODE
+//#define LIBSAC_ACCURATE_DD4A_ENCODE
 
 namespace sac {
 
-namespace dd8a {
+namespace dd4a {
 
-// Defined in quant_lut_dd8a.cpp
-extern const short kQuantLut[8][256];
+// Defined in quant_lut_dd4a.cpp
+extern const short kQuantLut[64][16];
 
 namespace {
 
 int block_size_in_bytes(const int num_samples) {
-  return num_samples + 1;
+  return 2 + (num_samples + 1) / 2;
 }
 
-const int kBlockSize = 16;
+const int kBlockSize = 32;
 const int kBytesPerBlock = block_size_in_bytes(kBlockSize);
-const int kNumMaps = 8;
-const int kEntiresPerMap = 256;
+const int kNumMaps = 64;
+const int kEntiresPerMap = 16;
 
 int get_max_delta(const short *map) {
   return map[kEntiresPerMap / 2 - 1];
@@ -121,13 +121,13 @@ void encode_block(const int16_t *in, uint8_t *out, int count, const int stride, 
   in += stride;
   int s1 = s_original;
 
-  // Encode predictor and map number into the starting sample.
-  s1 = ((s1 >> 4) << 4) | (map_no << 1) | predictor_no;
+  // Encode the high bits of the map number as part of the starting sample.
+  s1 = ((s1 >> 3) << 3) | (map_no >> 3);
 
   {
     // Do some rounding to improve the accuracy.
-    const int rounded1 = s1 + (1 << 4);
-    const int rounded2 = s1 - (1 << 4);
+    const int rounded1 = s1 + (1 << 3);
+    const int rounded2 = s1 - (1 << 3);
     if (rounded1 <= 32767 && std::abs(rounded1 - s_original) < std::abs(s1 - s_original))
       s1 = rounded1;
     if (rounded2 >= -32768 && std::abs(rounded2 - s_original) < std::abs(s1 - s_original))
@@ -138,23 +138,48 @@ void encode_block(const int16_t *in, uint8_t *out, int count, const int stride, 
   *out++ = s1;
   *out++ = s1 >> 8;
 
+  // First nibble is the low 3 bits of the map number and the predictor.
+  uint8_t byte = (map_no << 5) | (predictor_no << 4);
+
   // Get the decoding map for this block.
   const short *decode_map = kQuantLut[map_no];
 
   int s2 = s1;
-  for (int i = 1; i < count; ++i) {
+  int nibbles_left = count - 1;
+  for (; nibbles_left >= 2; nibbles_left -= 2) {
     // Encode the delta.
     int predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
     uint8_t code = encode(decode_map, *in - predicted);
     in += stride;
+    byte |= code;
 
-    // Output encoded byte.
-    *out++ = code;
+    // Decode and clamp for the next pass...
+    s2 = s1;
+    s1 = clamp(predicted + decode_map[code]);
+
+
+    // Write encoded byte to output stream.
+    *out++ = byte;
+
+    // Encode the delta.
+    predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
+    code = encode(decode_map, *in - predicted);
+    in += stride;
+    byte = code << 4;
 
     // Decode and clamp for the next pass...
     s2 = s1;
     s1 = clamp(predicted + decode_map[code]);
   }
+  if (nibbles_left) {
+    // Encode the delta.
+    int predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
+    uint8_t code = encode(decode_map, *in - predicted);
+    byte |= code;
+  }
+
+  // Write encoded byte to output stream.
+  *out++ = byte;
 }
 
 /// @brief Encode a single block.
@@ -172,7 +197,7 @@ void encode_block(const int16_t *in, uint8_t *out, int count, const int stride) 
   // Select which predictor to use for this block.
   int predictor_no = select_predictor(in, count);
 
-#ifdef LIBSAC_ACCURATE_DD8A_ENCODE
+#ifdef LIBSAC_ACCURATE_DD4A_ENCODE
 #error Not yet implemented.
   // Try all quantization maps and pick the best one.
   // TODO(m): Implement me!
@@ -216,7 +241,7 @@ packed_data_t *encode(int num_samples, int num_channels, int sample_rate, int16_
   const int encoded_size = num_channels * (num_full_blocks * kBytesPerBlock + block_size_in_bytes(final_samples));
 
   // Create the packed data container.
-  scoped_ptr<packed_data_t> data(new packed_data_t(encoded_size, num_samples, num_channels, sample_rate, SAC_FORMAT_DD8A));
+  scoped_ptr<packed_data_t> data(new packed_data_t(encoded_size, num_samples, num_channels, sample_rate, SAC_FORMAT_DD4A));
 
   // Encode all the full blocks.
 #ifdef LIBSAC_USE_OPENMP
@@ -244,6 +269,6 @@ packed_data_t *encode(int num_samples, int num_channels, int sample_rate, int16_
   return data.release();
 }
 
-} // namespace dd8a
+} // namespace dd4a
 
 } // namespace sac
