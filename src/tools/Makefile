@@ -24,11 +24,16 @@
 
 INCDIR = ../include
 LIBDIR = ../lib/out
+USE_OPENMP ?= YES
 
 CPP      = g++
 CPPFLAGS = -O3 -W -Wall -Wextra -I$(INCDIR)
-LFLAGS   = -L$(LIBDIR) -fopenmp
+LFLAGS   = -L$(LIBDIR)
 LIBS     = -lsac
+
+ifeq ($(USE_OPENMP), YES)
+LFLAGS += -fopenmp
+endif
 
 .PHONY: all clean
 

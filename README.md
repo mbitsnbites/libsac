@@ -30,6 +30,8 @@ may get linking errors such as `undefined reference to 'omp_get_num_threads'`.
 
 To disable the use of OpenMP, build the library using `make USE_OPENMP=NO`.
 
+For Mac OS X, or generally when using clang, disabling OpenMP may be required.
+
 Please note that encoding will typically be much slower when OpenMP is
 disabled.
 

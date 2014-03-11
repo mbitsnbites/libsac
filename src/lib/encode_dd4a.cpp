@@ -40,6 +40,7 @@
 #include "encode_dd4a.h"
 
 #include <algorithm>
+#include <cstdlib>
 
 #include "packed_data.h"
 #include "util.h"

@@ -25,6 +25,7 @@
 #include "util.h"
 
 #include <algorithm>
+#include <cstdlib>
 
 namespace sac {
 
