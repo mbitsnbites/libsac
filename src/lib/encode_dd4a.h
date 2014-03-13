@@ -22,8 +22,8 @@
 //     distribution.
 //-----------------------------------------------------------------------------
 
-#ifndef LIBSAC_DECODE_DD4A_H_
-#define LIBSAC_DECODE_DD4A_H_
+#ifndef LIBSAC_ENCODE_DD4A_H_
+#define LIBSAC_ENCODE_DD4A_H_
 
 #include "../include/libsac.h"
 #include "packed_data.h"
@@ -38,4 +38,4 @@ packed_data_t *encode(int num_samples, int num_channels, int sample_rate, int16_
 
 } // namespace sac
 
-#endif // LIBSAC_DECODE_DD4A_H_
+#endif // LIBSAC_ENCODE_DD4A_H_

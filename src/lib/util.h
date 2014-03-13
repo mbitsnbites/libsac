@@ -40,12 +40,6 @@ int inline clamp(const int x) {
   return x;
 }
 
-/// @brief Select the best predictor for the given block.
-/// @param block Start of the block.
-/// @param count Number of samples in the block.
-/// @returns The predictor number (0 or 1).
-int select_predictor(const int16_t *block, const int count);
-
 /// @brief Scoped pointer class.
 /// This is a simple scoped pointer class, similar to C++11 unique_ptr.
 template <class T>

@@ -54,8 +54,12 @@ extern const short kQuantLut[8][256];
 
 namespace {
 
+int block_size_in_bytes(int num_samples) {
+  return num_samples + 1;
+}
+
 const int kBlockSize = 16;
-const int kBytesPerBlock = kBlockSize + 1;
+const int kBytesPerBlock = block_size_in_bytes(kBlockSize);
 
 /// @brief Decode a single block.
 /// @param in Block of data to be decoded.
@@ -63,7 +67,7 @@ const int kBytesPerBlock = kBlockSize + 1;
 /// @param offset First sample in the encoded block to output.
 /// @param count Number of samples to output.
 /// @param stride The output sample stride.
-void decode_block(const uint8_t *in, int16_t *out, const int offset, int count, const int stride) {
+void decode_block(const uint8_t *in, int16_t *out, int offset, int count, int stride) {
   // Get the starting sample (16 bits).
   int16_t s16 = static_cast<int16_t>(in[0]) |
       (static_cast<int16_t>(in[1]) << 8);

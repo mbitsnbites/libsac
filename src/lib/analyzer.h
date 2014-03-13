@@ -22,31 +22,37 @@
 //     distribution.
 //-----------------------------------------------------------------------------
 
-#include "util.h"
+#ifndef LIBSAC_ANALYZER_H_
+#define LIBSAC_ANALYZER_H_
 
-#include <algorithm>
-#include <cstdlib>
+#include "../include/libsac.h"
 
 namespace sac {
 
-int select_predictor(const int16_t *block, const int count) {
-  int delta;
+/// @brief The analysis result for a block of samples.
+struct analysis_result_t {
+  analysis_result_t(int predictor_no, int max_delta, int rms_delta) :
+      predictor_no(predictor_no),
+      max_delta(max_delta),
+      rms_delta(rms_delta) {}
 
-  double err1 = 0.0;
-  for (int i = 1; i < count; ++i) {
-    delta = std::abs(static_cast<int>(block[i]) - static_cast<int>(block[i - 1]));
-    err1 += static_cast<double>(delta) * static_cast<double>(delta);
-  }
+  /// The best predictor to use for this block.
+  const int predictor_no;
 
-  delta = std::abs(static_cast<int>(block[1]) - static_cast<int>(block[0]));
-  double err2 = static_cast<double>(delta) * static_cast<double>(delta);
-  for (int i = 2; i < count; ++i) {
-    int predicted = 2 * static_cast<int>(block[i - 1]) - static_cast<int>(block[i - 2]);
-    delta = std::abs(static_cast<int>(block[i]) - predicted);
-    err2 += static_cast<double>(delta) * static_cast<double>(delta);
-  }
+  /// The maximum delta for this block using the given predictor.
+  const int max_delta;
 
-  return err2 <= err1 ? 1 : 0;
-}
+  /// The root mean square delta for this block using the given predictor.
+  const int rms_delta;
+};
+
+/// @brief Analyze the given block.
+/// @param block Start of the block.
+/// @param count Number of samples in the block.
+/// @param stride The input sample stride.
+/// @returns The analysis result.
+analysis_result_t analyze_block(const int16_t *block, int count, int stride);
 
 } // namespace sac
+
+#endif // LIBSAC_ANALYZER_H_

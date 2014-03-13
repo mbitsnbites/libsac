@@ -67,7 +67,7 @@ const int kBytesPerBlock = block_size_in_bytes(kBlockSize);
 /// @param offset First sample in the encoded block to output.
 /// @param count Number of samples to output.
 /// @param stride The output sample stride.
-void decode_block(const uint8_t *in, int16_t *out, int offset, int count, const int stride) {
+void decode_block(const uint8_t *in, int16_t *out, int offset, int count, int stride) {
   // Get the starting sample (16 bits).
   int16_t s16 = static_cast<int16_t>(in[0]) |
       (static_cast<int16_t>(in[1]) << 8);
@@ -83,14 +83,15 @@ void decode_block(const uint8_t *in, int16_t *out, int offset, int count, const 
   // Get the decoding map for this block.
   const short *decode_map = kQuantLut[((s1 << 3) & 0x38) | (byte >> 5)];
 
-  int s2 = s1;
-
   // Write the first sample to the output stream.
   if (--offset < 0) {
     *out = s1;
     out += stride;
   }
 
+  // Unroll the loop modulo 2 in order to make the handling of nibbles
+  // efficient.
+  int s2 = s1;
   int nibbles_left = count - 1;
   for (; nibbles_left >= 2; nibbles_left -= 2) {
     // Decode and clamp.
