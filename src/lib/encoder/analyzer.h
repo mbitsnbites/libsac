@@ -25,7 +25,7 @@
 #ifndef LIBSAC_ANALYZER_H_
 #define LIBSAC_ANALYZER_H_
 
-#include "../include/libsac.h"
+#include "libsac.h"
 
 namespace sac {
 

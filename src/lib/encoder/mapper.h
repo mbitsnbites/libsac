@@ -27,7 +27,7 @@
 
 #include <cstdlib>
 
-#include "../include/libsac.h"
+#include "libsac.h"
 
 namespace sac {
 

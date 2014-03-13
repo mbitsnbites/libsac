@@ -22,7 +22,7 @@
 //     distribution.
 //-----------------------------------------------------------------------------
 
-#include "analyzer.h"
+#include "encoder/analyzer.h"
 
 #include <algorithm>
 #include <cmath>

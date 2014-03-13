@@ -22,22 +22,22 @@
 //     distribution.
 //-----------------------------------------------------------------------------
 
-#ifndef LIBSAC_DECODE_DD4A_H_
-#define LIBSAC_DECODE_DD4A_H_
+#ifndef LIBSAC_DECODE_DD8A_H_
+#define LIBSAC_DECODE_DD8A_H_
 
-#include "../include/libsac.h"
+#include "libsac.h"
 #include "packed_data.h"
 
 namespace sac {
 
-namespace dd4a {
+namespace dd8a {
 
 void decode_channel(int16_t *out, const packed_data_t *in, int start, int count, int channel);
 
 void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int count);
 
-} // namespace dd4a
+} // namespace dd8a
 
 } // namespace sac
 
-#endif // LIBSAC_DECODE_DD4A_H_
+#endif // LIBSAC_DECODE_DD8A_H_

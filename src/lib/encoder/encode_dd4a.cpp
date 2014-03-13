@@ -21,48 +21,48 @@
 //     3. This notice may not be removed or altered from any source
 //     distribution.
 //-----------------------------------------------------------------------------
-// 8-bit DDPCM:
-// - 16 samples per block
-// - 17 bytes / block (53.1% of original size)
-// - 8 quantization maps (256 entires per map)
+// 4-bit DDPCM:
+// - 32 samples per block
+// - 18 bytes / block (28.1% of original size)
+// - 64 quantization maps (16 entries per map)
 // - Block format (bit layout):
-//   [ssss|ssss][ssss|mmmp][D1......][D2......][D3......] ... [D15......]
-//    s: Starting point (12 bits)
-//    m: Map-selection (3 bits)
+//   [ssss|ssss][ssss|smmm][mmmp|D1..][D2..|D3..][D4..|D5..] ... [D30.|D31.]
+//    s: Starting point (13 bits)
+//    m: Map-selection (6 bits)
 //    p: Predictor-selection (1 bit)
-//   Dx: Delta samples (8 bits / delta)
+//   Dx: Delta samples (4 bits / delta)
 //-----------------------------------------------------------------------------
 // This encoder is fairly generic, and not very optimized. There are several
 // possible optimizations that could improve encoding speeds.
 //-----------------------------------------------------------------------------
 
-#include "encode_dd8a.h"
+#include "encoder/encode_dd4a.h"
 
 #include <algorithm>
 #include <cstdlib>
 
-#include "analyzer.h"
-#include "mapper.h"
+#include "encoder/analyzer.h"
+#include "encoder/mapper.h"
 #include "packed_data.h"
 #include "util.h"
 
 namespace sac {
 
-namespace dd8a {
+namespace dd4a {
 
-// Defined in quant_lut_dd8a.cpp
-extern const short kQuantLut[8][256];
+// Defined in quant_lut_dd4a.cpp
+extern const short kQuantLut[64][16];
 
 namespace {
 
-int block_size_in_bytes(const int num_samples) {
-  return num_samples + 1;
+int block_size_in_bytes(int num_samples) {
+  return 2 + (num_samples + 1) / 2;
 }
 
-const int kBlockSize = 16;
+const int kBlockSize = 32;
 const int kBytesPerBlock = block_size_in_bytes(kBlockSize);
-const int kNumMaps = 8;
-const int kEntriesPerMap = 256;
+const int kNumMaps = 64;
+const int kEntriesPerMap = 16;
 
 class encoder_t {
   public:
@@ -99,7 +99,7 @@ class encoder_t {
 
   private:
     /// @brief Encode a single block.
-    /// This is the encoder core for the DD8A format.
+    /// This is the encoder core for the DD4A format.
     /// @param in Samples to be encoded.
     /// @param out Encoded output block.
     /// @param count Number of samples to encode.
@@ -112,13 +112,13 @@ class encoder_t {
       in += stride;
       int s1 = s_original;
 
-      // Encode predictor and map number into the starting sample.
-      s1 = ((s1 >> 4) << 4) | (map_no << 1) | predictor_no;
+      // Encode the high bits of the map number as part of the starting sample.
+      s1 = ((s1 >> 3) << 3) | (map_no >> 3);
 
       {
         // Do some rounding to improve the accuracy.
-        const int rounded1 = s1 + (1 << 4);
-        const int rounded2 = s1 - (1 << 4);
+        const int rounded1 = s1 + (1 << 3);
+        const int rounded2 = s1 - (1 << 3);
         if (rounded1 <= 32767 && std::abs(rounded1 - s_original) < std::abs(s1 - s_original))
           s1 = rounded1;
         if (rounded2 >= -32768 && std::abs(rounded2 - s_original) < std::abs(s1 - s_original))
@@ -129,23 +129,50 @@ class encoder_t {
       *out++ = s1;
       *out++ = s1 >> 8;
 
+      // First nibble is the low 3 bits of the map number and the predictor.
+      uint8_t byte = (map_no << 5) | (predictor_no << 4);
+
       // Get the coding map for this block.
       const map_t<kEntriesPerMap> &map = m_mapper[map_no];
 
+      // Unroll the loop modulo 2 in order to make the handling of nibbles
+      // efficient.
       int s2 = s1;
-      for (int i = 1; i < count; ++i) {
+      int nibbles_left = count - 1;
+      for (; nibbles_left >= 2; nibbles_left -= 2) {
         // Encode the delta.
         int predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
         uint8_t code = map.encode_delta(*in - predicted);
         in += stride;
+        byte |= code;
 
-        // Output encoded byte.
-        *out++ = code;
+        // Decode and clamp for the next pass...
+        s2 = s1;
+        s1 = clamp(predicted + map.decode_delta(code));
+
+
+        // Write encoded byte to output stream.
+        *out++ = byte;
+
+        // Encode the delta.
+        predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
+        code = map.encode_delta(*in - predicted);
+        in += stride;
+        byte = code << 4;
 
         // Decode and clamp for the next pass...
         s2 = s1;
         s1 = clamp(predicted + map.decode_delta(code));
       }
+      if (nibbles_left) {
+        // Encode the delta.
+        int predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
+        uint8_t code = map.encode_delta(*in - predicted);
+        byte |= code;
+      }
+
+      // Write encoded byte to output stream.
+      *out++ = byte;
     }
 
     mapper_t<kNumMaps, kEntriesPerMap> m_mapper;
@@ -160,7 +187,7 @@ packed_data_t *encode(int num_samples, int num_channels, int sample_rate, int16_
   const int encoded_size = num_channels * (num_full_blocks * kBytesPerBlock + block_size_in_bytes(final_samples));
 
   // Create the packed data container.
-  scoped_ptr<packed_data_t> data(new packed_data_t(encoded_size, num_samples, num_channels, sample_rate, SAC_FORMAT_DD8A));
+  scoped_ptr<packed_data_t> data(new packed_data_t(encoded_size, num_samples, num_channels, sample_rate, SAC_FORMAT_DD4A));
 
   encoder_t encoder;
 
@@ -190,6 +217,6 @@ packed_data_t *encode(int num_samples, int num_channels, int sample_rate, int16_
   return data.release();
 }
 
-} // namespace dd8a
+} // namespace dd4a
 
 } // namespace sac

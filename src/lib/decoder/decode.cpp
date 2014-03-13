@@ -22,12 +22,12 @@
 //     distribution.
 //-----------------------------------------------------------------------------
 
-#include "../include/libsac.h"
+#include "libsac.h"
 
 #include <algorithm>
 
-#include "decode_dd4a.h"
-#include "decode_dd8a.h"
+#include "decoder/decode_dd4a.h"
+#include "decoder/decode_dd8a.h"
 #include "packed_data.h"
 
 using namespace sac;

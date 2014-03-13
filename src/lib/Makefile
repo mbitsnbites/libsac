@@ -26,7 +26,7 @@ OUTDIR     ?= out
 USE_OPENMP ?= YES
 
 CPP      = g++
-CPPFLAGS = -c -O3 -funroll-loops -W -Wall -Wextra
+CPPFLAGS = -c -O3 -funroll-loops -W -Wall -Wextra -I. -I../include
 AR       = ar
 ARFLAGS  = -rsc
 
@@ -64,6 +64,12 @@ $(LIB): $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
 $(OUTDIR)/%.o: %.cpp
+	$(CPP) $(CPPFLAGS) -o $@ $<
+
+$(OUTDIR)/%.o: decoder/%.cpp
+	$(CPP) $(CPPFLAGS) -o $@ $<
+
+$(OUTDIR)/%.o: encoder/%.cpp
 	$(CPP) $(CPPFLAGS) -o $@ $<
 
 # These dependency files are generated automatically when building the object

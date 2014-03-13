@@ -21,16 +21,16 @@
 //     3. This notice may not be removed or altered from any source
 //     distribution.
 //-----------------------------------------------------------------------------
-// 4-bit DDPCM:
-// - 32 samples per block
-// - 18 bytes / block (28.1% of original size)
-// - 64 quantization maps (16 entries per map)
+// 8-bit DDPCM:
+// - 16 samples per block
+// - 17 bytes / block (53.1% of original size)
+// - 8 quantization maps (256 entires per map)
 // - Block format (bit layout):
-//   [ssss|ssss][ssss|smmm][mmmp|D1..][D2..|D3..][D4..|D5..] ... [D30.|D31.]
-//    s: Starting point (13 bits)
-//    m: Map-selection (6 bits)
+//   [ssss|ssss][ssss|mmmp][D1......][D2......][D3......] ... [D15......]
+//    s: Starting point (12 bits)
+//    m: Map-selection (3 bits)
 //    p: Predictor-selection (1 bit)
-//   Dx: Delta samples (4 bits / delta)
+//   Dx: Delta samples (8 bits / delta)
 //-----------------------------------------------------------------------------
 // This decoder is fairly generic, and not very optimized. When performance is
 // critical, and the configuraiton is known, it is recommended that a
@@ -38,7 +38,7 @@
 // block aligned, and only interleaved / non-interleaved output is to be used).
 //-----------------------------------------------------------------------------
 
-#include "decode_dd4a.h"
+#include "decoder/decode_dd8a.h"
 
 #include <algorithm>
 
@@ -47,18 +47,18 @@
 
 namespace sac {
 
-namespace dd4a {
+namespace dd8a {
 
-// Defined in quant_lut_dd4a.cpp
-extern const short kQuantLut[64][16];
+// Defined in quant_lut_dd8a.cpp
+extern const short kQuantLut[8][256];
 
 namespace {
 
-int block_size_in_bytes(const int num_samples) {
-  return 2 + (num_samples + 1) / 2;
+int block_size_in_bytes(int num_samples) {
+  return num_samples + 1;
 }
 
-const int kBlockSize = 32;
+const int kBlockSize = 16;
 const int kBytesPerBlock = block_size_in_bytes(kBlockSize);
 
 /// @brief Decode a single block.
@@ -74,55 +74,36 @@ void decode_block(const uint8_t *in, int16_t *out, int offset, int count, int st
   int s1 = static_cast<int>(s16);
   in += 2;
 
-  // Get the first byte.
-  uint8_t byte = *in++;
-
   // Get the predictor for this block.
-  const int predictor_no = (byte >> 4) & 1;
+  const int predictor_no = s1 & 1;
 
   // Get the decoding map for this block.
-  const short *decode_map = kQuantLut[((s1 << 3) & 0x38) | (byte >> 5)];
+  const short *decode_map = kQuantLut[(s1 >> 1) & 7];
+
+  int s2 = s1;
+
+  // Decode but don't output offset samples.
+  for (int i = 0; i < offset; ++i) {
+    int predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
+    s2 = s1;
+    s1 = clamp(predicted + decode_map[*in++]);
+  }
 
   // Write the first sample to the output stream.
-  if (--offset < 0) {
+  *out = s1;
+  out += stride;
+
+  for (int i = 1; i < count; ++i) {
+    // Predict the next sample.
+    int predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
+
+    // Decode and clamp.
+    s2 = s1;
+    s1 = clamp(predicted + decode_map[*in++]);
+
+    // Write sample to the output stream.
     *out = s1;
     out += stride;
-  }
-
-  // Unroll the loop modulo 2 in order to make the handling of nibbles
-  // efficient.
-  int s2 = s1;
-  int nibbles_left = count - 1;
-  for (; nibbles_left >= 2; nibbles_left -= 2) {
-    // Decode and clamp.
-    int predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
-    s2 = s1;
-    s1 = clamp(predicted + decode_map[byte & 15]);
-
-    // Write sample to the output stream.
-    if (--offset < 0) {
-      *out = s1;
-      out += stride;
-    }
-
-    // Get the next encoded byte from the input stream.
-    byte = *in++;
-
-    // Decode and clamp.
-    predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
-    s2 = s1;
-    s1 = clamp(predicted + decode_map[byte >> 4]);
-
-    // Write sample to the output stream.
-    if (--offset < 0) {
-      *out = s1;
-      out += stride;
-    }
-  }
-  if (nibbles_left && --offset < 0) {
-    // Decode, clamp and write sample to the output stream.
-    int predicted = predictor_no == 0 ? s1 : 2 * s1 - s2;
-    *out = clamp(predicted + decode_map[byte & 15]);
   }
 }
 
@@ -172,6 +153,6 @@ void decode_interleaved(int16_t *out, const packed_data_t *in, int start, int co
   }
 }
 
-} // namespace dd4a
+} // namespace dd8a
 
 } // namespace sac
