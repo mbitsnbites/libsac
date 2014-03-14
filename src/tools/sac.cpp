@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 
+#include "hires_time.h"
+
 // TODO(m): Move the things in tools:: into separate files.
 
 namespace tools {
@@ -155,6 +157,9 @@ void write_uint32(std::ostream& s, uint32_t x) {
 } // anonymous namespace
 
 sound_t *load_wave(const std::string& file_name) {
+  hires_time_t time;
+  time.push();
+
   std::ifstream s(file_name.c_str());
 
   // Read header.
@@ -228,10 +233,16 @@ sound_t *load_wave(const std::string& file_name) {
     }
   }
 
+  double dt = time.pop_delta();
+  std::cout << "Loaded WAVE format file in " << (dt * 1000.0) << " ms.\n";
+
   return sound.release();
 }
 
 void save_wave(const std::string &file_name, const sound_t *sound) {
+  hires_time_t time;
+  time.push();
+
   std::ofstream s(file_name.c_str());
 
   int data_size = sound->num_samples() * sound->num_channels() * 2;
@@ -266,20 +277,31 @@ void save_wave(const std::string &file_name, const sound_t *sound) {
   }
 
   s.write(reinterpret_cast<char*>(&buffer[0]), data_size);
+
+  double dt = time.pop_delta();
+  std::cout << "Saved WAVE format file in " << (dt * 1000.0) << " ms.\n";
 }
 
 sound_t *load_sac(const std::string &file_name) {
+  hires_time_t time;
+
   // Load the packed data.
+  time.push();
   sac_packed_data_t *packed = sac_load_file(file_name.c_str());
   if (!packed) {
     return 0;
   }
+  double dt = time.pop_delta();
+  std::cout << "Loaded SAC format file in " << (dt * 1000.0) << " ms.\n";
 
   // Decode the sound.
   scoped_ptr<sound_t> sound(new sound_t(sac_get_num_samples(packed), sac_get_num_channels(packed), sac_get_sample_rate(packed)));
+  time.push();
   for (int ch = 0; ch < sound->num_channels(); ++ch) {
     sac_decode_channel(sound->channel(ch), packed, 0, sound->num_samples(), ch);
   }
+  dt = time.pop_delta();
+  std::cout << "Decoded SAC in " << (dt * 1000.0) << " ms.\n";
 
   // Free the packedsound.
   sac_free(packed);
@@ -288,15 +310,24 @@ sound_t *load_sac(const std::string &file_name) {
 }
 
 void save_sac(const std::string &file_name, const sound_t *sound, sac_encoding_t encoding) {
+  hires_time_t time;
+
   // Encode the sound.
+  time.push();
   sac_packed_data_t *packed = sac_encode(sound->num_samples(), sound->num_channels(), sound->sample_rate(), encoding, sound->channels());
   if (!packed) {
     std::cerr << "Unable to encode the sound." << std::endl;
     return;
   }
+  double dt = time.pop_delta();
+  std::cout << "Encoded SAC in " << (dt * 1000.0) << " ms.\n";
+
 
   // Save the SAC format file.
+  time.push();
   sac_save_file(file_name.c_str(), packed);
+  dt = time.pop_delta();
+  std::cout << "Saved SAC format file in " << (dt * 1000.0) << " ms.\n";
 
   // Free the encoded sound.
   sac_free(packed);

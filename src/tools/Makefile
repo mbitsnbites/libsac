@@ -42,6 +42,6 @@ all: sac
 clean:
 	rm -f sac
 
-sac: sac.cpp $(LIBDIR)/libsac.a
+sac: sac.cpp $(LIBDIR)/libsac.a hires_time.h
 	$(CPP) $(CPPFLAGS) $(LFLAGS) -o sac sac.cpp $(LIBS)
 
