@@ -22,12 +22,14 @@
 #     distribution.
 #-----------------------------------------------------------------------------
 
-INCDIR = ../include
-LIBDIR = ../lib/out
+OUTDIR     ?= out
 USE_OPENMP ?= YES
 
+INCDIR = ../include
+LIBDIR = ../lib/out
+
 CPP      = g++
-CPPFLAGS = -O3 -W -Wall -Wextra -I$(INCDIR)
+CPPFLAGS = -c -O3 -W -Wall -Wextra -I$(INCDIR)
 LFLAGS   = -L$(LIBDIR)
 LIBS     = -lsac
 
@@ -35,13 +37,27 @@ ifeq ($(USE_OPENMP), YES)
 LFLAGS += -fopenmp
 endif
 
+# Automatically generate dependency files
+CPPFLAGS += -MMD -MP
+
+OBJS = $(OUTDIR)/file_io.o \
+       $(OUTDIR)/sac.o
+
 .PHONY: all clean
 
-all: sac
+all: $(OUTDIR)/sac
 
 clean:
-	rm -f sac
+	rm -f $(OUTDIR)/sac $(OBJS)
 
-sac: sac.cpp $(LIBDIR)/libsac.a hires_time.h
-	$(CPP) $(CPPFLAGS) $(LFLAGS) -o sac sac.cpp $(LIBS)
+$(OUTDIR)/sac: $(OUTDIR)/sac.o $(OUTDIR)/file_io.o $(LIBDIR)/libsac.a
+	$(CPP) $(LFLAGS) -o $@ $(OUTDIR)/sac.o $(OUTDIR)/file_io.o $(LIBS)
+
+
+$(OUTDIR)/%.o: %.cpp
+	$(CPP) $(CPPFLAGS) -o $@ $<
+
+# These dependency files are generated automatically when building the object
+# files.
+-include $(OBJS:.o=.d)
 
