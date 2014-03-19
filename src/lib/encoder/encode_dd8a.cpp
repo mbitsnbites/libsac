@@ -56,7 +56,7 @@ extern const short kQuantLut[8][256];
 namespace {
 
 int block_size_in_bytes(const int num_samples) {
-  return num_samples + 1;
+  return num_samples > 0 ? num_samples + 1 : 0;
 }
 
 const int kBlockSize = 16;

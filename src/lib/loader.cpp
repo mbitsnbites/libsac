@@ -49,6 +49,28 @@ uint32_t read_uint32(std::istream &f) {
       (static_cast<uint32_t>(buf[3]) << 24);
 }
 
+int data_size(sac_encoding_t format, int num_samples, int num_channels) {
+  switch (format) {
+    case SAC_FORMAT_DD4A:
+      {
+        const int block_size = 32;
+        int num_blocks = (num_samples + block_size - 1) / block_size;
+        int bytes_per_channel = (num_samples + num_blocks * 4 + 1) / 2;
+        return bytes_per_channel * num_channels;
+      }
+
+    case SAC_FORMAT_DD8A:
+      {
+        const int block_size = 16;
+        int num_blocks = (num_samples + block_size - 1) / block_size;
+        return (num_samples + num_blocks) * num_channels;
+      }
+
+    default:
+      return 0;
+  }
+}
+
 } // anonymous namespace
 
 extern "C"
@@ -109,6 +131,11 @@ sac_packed_data_t *sac_load_file(const char *file_name) {
       case 0x41544144: {
         if (encoding == SAC_FORMAT_UNDEFINED) {
           // We don't have the data definition yet.
+          return 0;
+        }
+
+        if (chunk_size != data_size(encoding, num_samples, num_channels)) {
+          // Wrong data size.
           return 0;
         }
 
