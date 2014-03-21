@@ -55,6 +55,11 @@ extern const short kQuantLut[8][256];
 
 namespace {
 
+// Block delta RMS thresholds used for selecting which quantization map to use.
+const short kRmsThresholds[7] = {
+  100, 165, 337, 675, 1350, 2700, 5500
+};
+
 int block_size_in_bytes(const int num_samples) {
   return num_samples > 0 ? num_samples + 1 : 0;
 }
@@ -83,11 +88,10 @@ class encoder_t {
       // Analyze the block (select predictor etc).
       const analysis_result_t analysis = analyze_block(in, count, stride);
 
-      // Find the map that best matches the max delta.
-      // TODO(m): Make better use of the analysis result.
+      // Find the map that best matches this block.
       int map_no = kNumMaps - 1;
-      for (int m = 0; m < kNumMaps; ++m) {
-        if (analysis.max_delta < m_mapper[m].max_delta()) {
+      for (int m = 0; m < kNumMaps - 1; ++m) {
+        if (analysis.rms_delta < kRmsThresholds[m]) {
           map_no = m;
           break;
         }
