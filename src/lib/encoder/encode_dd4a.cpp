@@ -83,13 +83,16 @@ class encoder_t {
       // Analyze the block (select predictor etc).
       const analysis_result_t analysis = analyze_block(in, count, stride);
 
-      // Find the map that best matches the max delta.
-      // TODO(m): Make better use of the analysis result.
-      int map_no = kNumMaps - 1;
-      for (int m = 0; m < kNumMaps; ++m) {
-        if (analysis.max_delta < m_mapper[m].max_delta()) {
-          map_no = m;
-          break;
+      // Find the map that best matches this block.
+      int map_no = 0;
+      {
+        int best_max_diff = std::abs(analysis.max_delta - m_mapper[0].max_delta());
+        for (int m = 1; m < kNumMaps; ++m) {
+          int max_diff = std::abs(analysis.max_delta - m_mapper[m].max_delta());
+          if (max_diff < best_max_diff) {
+            map_no = m;
+            best_max_diff = max_diff;
+          }
         }
       }
 
