@@ -67,9 +67,9 @@ class map_t {
           c2 = mid;
       }
 
-      // Now map[c1] <= abs_delta < map[c2].
+      // Now map[c1] <= abs_delta <= map[c2].
       uint8_t code;
-      if (2 * abs_delta < m_map[c1] + m_map[c2])
+      if (2 * abs_delta <= m_map[c1] + m_map[c2])
         code = c1;
       else
         code = c2;

@@ -153,7 +153,6 @@ class encoder_t {
         s2 = s1;
         s1 = clamp(predicted + map.decode_delta(code));
 
-
         // Write encoded byte to output stream.
         *out++ = byte;
 
