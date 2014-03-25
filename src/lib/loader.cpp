@@ -81,8 +81,8 @@ sac_packed_data_t *sac_load_file(const char *file_name) {
 
   std::ifstream f(file_name);
 
-  // File master chunk.
-  if (read_uint32(f) != 0x4D435044) {
+  // File master chunk (must have chunk ID "SAC\1").
+  if (read_uint32(f) != 0x01434153) {
     return 0;
   }
   const int file_size = read_uint32(f) + 8;

@@ -11,8 +11,7 @@ The library is written in C++, but the API is plain C.
 
 ## IMPORTANT!
 
-This is work-in-progress code! The file and data formats as well as the
-library API will most likely change!
+This is experimental code. The library API will most likely change.
 
 
 ## Building

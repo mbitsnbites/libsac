@@ -81,7 +81,7 @@ void sac_save_file(const char *file_name, const sac_packed_data_t *data_) {
   std::ofstream f(file_name);
 
   // File master chunk.
-  write_uint32(f, 0x4D435044);            // "DPCM"
+  write_uint32(f, 0x01434153);            // "SAC\1"
   write_uint32(f, file_size - 8);         // Master chunk size.
 
   // Sub chunk: Format (must come before the data chunk).
