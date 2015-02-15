@@ -35,8 +35,8 @@ USE_OPENMP ?= YES
 INCDIR = ../include
 LIBDIR = ../lib/out
 
-CPP      = $(PREFIX)g++
-CPPFLAGS = -c -O3 -W -Wall -Wextra -I$(INCDIR)
+CXX      = $(PREFIX)g++
+CXXFLAGS = -c -O3 -W -Wall -Wextra -I$(INCDIR)
 LFLAGS   = -L$(LIBDIR)
 LIBS     = -lsac
 
@@ -45,7 +45,7 @@ LFLAGS += -fopenmp
 endif
 
 # Automatically generate dependency files
-CPPFLAGS += -MMD -MP
+CXXFLAGS += -MMD -MP
 
 OBJS = $(OUTDIR)/file_io.o \
        $(OUTDIR)/sac.o
@@ -58,11 +58,11 @@ clean:
 	rm -f $(OUTDIR)/sac $(OBJS)
 
 $(OUTDIR)/sac: $(OUTDIR)/sac.o $(OUTDIR)/file_io.o $(LIBDIR)/libsac.a
-	$(CPP) $(LFLAGS) -o $@ $(OUTDIR)/sac.o $(OUTDIR)/file_io.o $(LIBS)
+	$(CXX) $(LFLAGS) -o $@ $(OUTDIR)/sac.o $(OUTDIR)/file_io.o $(LIBS)
 
 
 $(OUTDIR)/%.o: %.cpp
-	$(CPP) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) -o $@ $<
 
 # These dependency files are generated automatically when building the object
 # files.

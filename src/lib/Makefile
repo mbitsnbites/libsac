@@ -32,18 +32,18 @@ PREFIX     ?=
 OUTDIR     ?= out
 USE_OPENMP ?= YES
 
-CPP      = $(PREFIX)g++
-CPPFLAGS = -c -O3 -funroll-loops -W -Wall -Wextra -I. -I../include
+CXX      = $(PREFIX)g++
+CXXFLAGS = -c -O3 -funroll-loops -W -Wall -Wextra -I. -I../include
 AR       = $(PREFIX)ar
 ARFLAGS  = -rsc
 
 # Enable OpenMP?
 ifeq ($(USE_OPENMP), YES)
-CPPFLAGS += -fopenmp -DLIBSAC_USE_OPENMP
+CXXFLAGS += -fopenmp -DLIBSAC_USE_OPENMP
 endif
 
 # Automatically generate dependency files
-CPPFLAGS += -MMD -MP
+CXXFLAGS += -MMD -MP
 
 OBJS = $(OUTDIR)/analyzer.o \
        $(OUTDIR)/decode.o \
@@ -71,13 +71,13 @@ $(LIB): $(OBJS)
 	$(AR) $(ARFLAGS) $(LIB) $(OBJS)
 
 $(OUTDIR)/%.o: %.cpp
-	$(CPP) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) -o $@ $<
 
 $(OUTDIR)/%.o: decoder/%.cpp
-	$(CPP) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) -o $@ $<
 
 $(OUTDIR)/%.o: encoder/%.cpp
-	$(CPP) $(CPPFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) -o $@ $<
 
 # These dependency files are generated automatically when building the object
 # files.
