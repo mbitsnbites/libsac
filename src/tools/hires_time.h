@@ -43,10 +43,10 @@ class hires_time_t {
   public:
     hires_time_t() {
 #ifdef WIN32
-      if(QueryPerformanceFrequency((LARGE_INTEGER*)&m_time_freq)) {
+      if(QueryPerformanceFrequency((LARGE_INTEGER*)&m_time_freq))
         QueryPerformanceCounter((LARGE_INTEGER*)&m_time_start);
       else
-        mTimeFreq = 0;
+        m_time_freq = 0;
 #else
       struct timeval tv;
       gettimeofday(&tv, 0);
