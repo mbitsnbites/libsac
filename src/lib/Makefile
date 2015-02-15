@@ -22,12 +22,19 @@
 #     distribution.
 #-----------------------------------------------------------------------------
 
+# Note: To cross compile for Windows on a Linux host:
+#  1. Install mingw-w64 (Ubuntu: sudo apt-get install mingw-w64).
+#  2. Create a dedicated output directoru, e.g. out_win64.
+#  3. Run make with PREFIX and OUTDIR set appropriately, e.g:
+#      make PREFIX=x86_64-w64-mingw32- OUTDIR=out_win64
+
+PREFIX     ?=
 OUTDIR     ?= out
 USE_OPENMP ?= YES
 
-CPP      = g++
+CPP      = $(PREFIX)g++
 CPPFLAGS = -c -O3 -funroll-loops -W -Wall -Wextra -I. -I../include
-AR       = ar
+AR       = $(PREFIX)ar
 ARFLAGS  = -rsc
 
 # Enable OpenMP?

@@ -22,13 +22,20 @@
 #     distribution.
 #-----------------------------------------------------------------------------
 
+# Note: To cross compile for Windows on a Linux host:
+#  1. Install mingw-w64 (Ubuntu: sudo apt-get install mingw-w64).
+#  2. Create a dedicated output directoru, e.g. out_win64.
+#  3. Run make with PREFIX, OUTDIR and LIBDIR set appropriately, e.g:
+#      make PREFIX=x86_64-w64-mingw32- OUTDIR=out_win64 LIBDIR=../lib/out_win64
+
+PREFIX     ?=
 OUTDIR     ?= out
 USE_OPENMP ?= YES
 
 INCDIR = ../include
 LIBDIR = ../lib/out
 
-CPP      = g++
+CPP      = $(PREFIX)g++
 CPPFLAGS = -c -O3 -W -Wall -Wextra -I$(INCDIR)
 LFLAGS   = -L$(LIBDIR)
 LIBS     = -lsac
