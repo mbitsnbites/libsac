@@ -71,7 +71,7 @@ void write_uint32(std::ostream& s, uint32_t x) {
 } // anonymous namespace
 
 sound_t *load_wave(const std::string& file_name) {
-  std::ifstream s(file_name.c_str());
+  std::ifstream s(file_name.c_str(), std::ifstream::in | std::ifstream::binary);
 
   // Read header.
   if (read_uint32(s) != 0x46464952) {
@@ -148,7 +148,7 @@ sound_t *load_wave(const std::string& file_name) {
 }
 
 void save_wave(const std::string &file_name, const sound_t *sound) {
-  std::ofstream s(file_name.c_str());
+  std::ofstream s(file_name.c_str(), std::ofstream::out | std::ofstream::binary);
 
   int data_size = sound->num_samples() * sound->num_channels() * 2;
   int file_size = 12 + 24 + 8 + data_size;

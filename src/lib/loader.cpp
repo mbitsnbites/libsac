@@ -79,7 +79,7 @@ sac_packed_data_t *sac_load_file(const char *file_name) {
     return 0;
   }
 
-  std::ifstream f(file_name);
+  std::ifstream f(file_name, std::ifstream::in | std::ifstream::binary);
 
   // File master chunk (must have chunk ID "SAC\1").
   if (read_uint32(f) != 0x01434153) {

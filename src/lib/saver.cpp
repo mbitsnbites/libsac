@@ -78,7 +78,7 @@ void sac_save_file(const char *file_name, const sac_packed_data_t *data_) {
       return;
   }
 
-  std::ofstream f(file_name);
+  std::ofstream f(file_name, std::ofstream::out | std::ofstream::binary);
 
   // File master chunk.
   write_uint32(f, 0x01434153);            // "SAC\1"
