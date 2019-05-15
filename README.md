@@ -16,9 +16,13 @@ This is experimental code. The library API will most likely change.
 
 ## Building
 
-To build the library, run `make` from the lib folder.
+To build the library and the conversion tool, use `cmake`. E.g:
 
-To build to conversion tool, run `make` from the tools folder.
+```bash
+$ mkdir build && cd build
+$ cmake ../src
+$ cmake --build .
+```
 
 
 ## A note on OpenMP
@@ -26,13 +30,6 @@ To build to conversion tool, run `make` from the tools folder.
 The default is for libsac to use OpenMP, which requires that you enable OpenMP
 when linking to the library (e.g. using `-fopenmp` for gcc/g++), otherwise you
 may get linking errors such as `undefined reference to 'omp_get_num_threads'`.
-
-To disable the use of OpenMP, build the library using `make USE_OPENMP=NO`.
-
-For Mac OS X, or generally when using clang, disabling OpenMP may be required.
-
-Please note that encoding will typically be much slower when OpenMP is
-disabled.
 
 
 ## License
