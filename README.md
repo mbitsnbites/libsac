@@ -1,3 +1,5 @@
+## ⚠️ This repository has moved to: https://gitlab.com/mbitsnbites/libsac
+
 # libsac
 
 This is a reference implementation of the Simple Audio Compression (SAC)
